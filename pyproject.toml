@@ -1,0 +1,44 @@
+[project]
+name = "ret-c2-016"
+version = "0.1.0"
+description = "PriceMarginAnomalyDetectionAgent — AgentCore Template"
+requires-python = ">=3.11"
+# The framework (agenticstar-agentcore) is NOT a public-PyPI dependency; it is
+# installed from the platform package registry. Pinning it here would make
+# `pip install -e .` fail, because it is not resolvable from the default index.
+dependencies = [
+    "agenticstar-agentcore[marketplace,openai]==1.0.3",]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.0.3",
+    "pytest-cov==5.0.0",
+    "pytest-asyncio==1.4.0",
+    "ruff==0.4.4",
+    "mypy==1.10.0",
+    "types-PyYAML==6.0.12.20260815",
+]
+
+[build-system]
+requires = ["setuptools==68.2.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+# The example walkthroughs under src/examples/ are illustrative reference
+# material, not part of the agent; they are excluded rather than annotated.
+exclude = ["src/examples/"]
+# Framework-wheel compatibility exception: the published agenticstar-agentcore
+# wheel ships no py.typed marker, so framework.* / shared.* imports resolve to
+# Any — which makes every required framework subclass an [import-untyped] /
+# "subclass of Any" error. Every other strict setting stays on.
+disallow_subclassing_any = false
+
+[[tool.mypy.overrides]]
+module = ["framework.*", "shared.*"]
+ignore_missing_imports = true

@@ -1,0 +1,35 @@
+# Runtime parameters - loaded by the platform registry and passed as
+# Graph(config=...). Separate from config/agent.yaml, which is the static
+# registration manifest and carries no runtime values.
+#
+# In the standalone deployment the same file is read by _runtime_config()
+# (src/graph/graph.py) and forwarded to the inner domain graph, which
+# republishes the retrieval settings into inner state for the domain nodes.
+# Every value below is re-validated (type, finiteness, range) before it is
+# forwarded, so a malformed file falls back to the node defaults instead of
+# weakening a threshold.
+
+max_retry: 3
+timeout_s: 30
+
+# Retrieval tuning (RetrieveNode / RerankFilterNode). A caller may narrow the
+# retrieval depth per invocation via input_context.top_k (bounded 1..20); the
+# relevance floor is operator-only and has no caller override.
+# hybrid_search is declared for a deployment that wires a real hybrid vector
+# store - pricing data carries product codes and identifiers, which lexical
+# matching handles better than embeddings alone. The bundled deterministic
+# retriever does not consume it.
+retrieval:
+  top_k: 5
+  score_threshold: 0.35
+  hybrid_search: true
+
+# Answer-synthesis settings (GenerateAnswerNode). The current build assembles
+# the explanation deterministically from the retrieved passages and reads none
+# of these; they are forwarded to the inner graph so a model-backed build can
+# consume them without a config-shape change. Temperature 0.0 because pricing
+# and margin output feeds commercial decisions - determinism over creativity.
+llm:
+  system_prompt_template: "prompts/price_margin_anomaly.j2"
+  temperature: 0.0
+  max_tokens: 2000
